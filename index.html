@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منشئ كشف الحضور والغياب للمحاضرات</title>
+    <!-- مكتبة لطباعة وتصدير ملفات PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --bg-color: #f8fafc;
+            --border-color: #cbd5e1;
+        }
+        body {
+            font-family: 'Cairo', Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            color: #1e293b;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        /* ترويسة الموقع الجديدة */
+        .site-header {
+            text-align: center;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+        .site-header h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.5rem;
+        }
+        .site-header p {
+            margin: 0;
+            font-size: 1.05rem;
+            opacity: 0.95;
+        }
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        .section-title {
+            background: #eff6ff;
+            color: var(--primary-color);
+            padding: 8px 15px;
+            border-radius: 6px;
+            margin: 20px 0 10px 0;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95em;
+            font-family: inherit;
+        }
+        input:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .btn {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background-color: #2563eb;
+        }
+        .btn-danger {
+            background-color: #ef4444;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .btn-success {
+            background-color: #10b981;
+        }
+        .table-responsive {
+            overflow-x: auto;
+            margin-top: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+        }
+        th {
+            background-color: #f1f5f9;
+            color: var(--primary-color);
+        }
+        .attendance-btn {
+            cursor: pointer;
+            padding: 5px 10px;
+            font-weight: bold;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: #fff;
+        }
+        .present {
+            background-color: #d1fae5;
+            color: #065f46;
+            border-color: #10b981;
+        }
+        .absent {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: #ef4444;
+        }
+        .actions-bar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- الترويسة الجديدة -->
+    <div class="site-header">
+        <h1>تصميم مندوب قسم الذكاء الاصطناعي _ مستوى أول</h1>
+        <p>اخوكم / يوسف وليد المروني</p>
+    </div>
+
+    <h2>📋 منشئ كشف الحضور والغياب للمحاضرات</h2>
+
+    <!-- بيانات النموذج الأساسية -->
+    <div class="section-title">بيانات المقرر الدراسي</div>
+    <div class="form-grid">
+        <div class="input-group">
+            <label>اسم المقرر</label>
+            <input type="text" id="cCourse" value="برمجة عملي">
+        </div>
+        <div class="input-group">
+            <label>التخصص</label>
+            <input type="text" id="cSpecialty" value="الذكاء الاصطناعي">
+        </div>
+        <div class="input-group">
+            <label>المستوى</label>
+            <input type="text" id="cLevel" value="الأول">
+        </div>
+        <div class="input-group">
+            <label>الفصل الدراسي</label>
+            <input type="text" id="cTerm" value="الأول">
+        </div>
+        <div class="input-group">
+            <label>أستاذ المقرر</label>
+            <input type="text" id="cDoctor" value="د/ هيثم حمزة">
+        </div>
+        <div class="input-group">
+            <label>العام الجامعي</label>
+            <input type="text" id="cYear" value="2026-2027م">
+        </div>
+        <div class="input-group">
+            <label>اسم المندوب</label>
+            <input type="text" id="cRep" value="يوسف وليد المروني">
+        </div>
+        <div class="input-group">
+            <label>عدد المحاضرات (الأسابيع)</label>
+            <input type="number" id="lecturesCount" value="5" min="1" max="15" onchange="rebuildTable()">
+        </div>
+    </div>
+
+    <!-- إدارة الطلاب -->
+    <div class="section-title">قائمة الطلاب وحالة الحضور</div>
+    <div style="margin-bottom: 10px; display: flex; gap: 10px;">
+        <input type="text" id="newStudentName" placeholder="أدخل اسم الطالب الجديد..." style="flex: 1;">
+        <button class="btn btn-success" onclick="addStudent()">+ إضافة طالب</button>
+    </div>
+
+    <div class="table-responsive">
+        <table id="mainTable">
+            <thead>
+                <tr id="tableHeaderRow">
+                    <th>#</th>
+                    <th>اسم الطالب</th>
+                    <th>نسبة الحضور</th>
+                    <th>إجراءات</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- سيتم حقن بيانات الطلاب هنا -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- أزرار التحكم -->
+    <div class="actions-bar">
+        <button class="btn" onclick="exportPDF()">⬇️ تحميل الكشف PDF</button>
+        <button class="btn btn-danger" onclick="clearAllStudents()">حذف كل الطلاب</button>
+    </div>
+</div>
+
+<script>
+    let students = [
+        "يوسف وليد المروني",
+        "محمد البطري",
+        "زيد العظهي",
+        "ابراهيم الحدادي",
+        "نواف السودي",
+        "زين العابدين سفيان",
+        "عبدالباري عبدالله"
+    ];
+
+    let attendanceData = {};
+
+    function initApp() {
+        students.forEach(student => {
+            let count = parseInt(document.getElementById('lecturesCount').value);
+            attendanceData[student] = new Array(count).fill(true);
+        });
+        rebuildTable();
+    }
+
+    function rebuildTable() {
+        const count = parseInt(document.getElementById('lecturesCount').value);
+        const headerRow = document.getElementById('tableHeaderRow');
+        
+        let headerHTML = `<th>#</th><th>اسم الطالب</th>`;
+        for (let i = 1; i <= count; i++) {
+            headerHTML += `<th>محاضرة ${i}</th>`;
+        }
+        headerHTML += `<th>نسبة الحضور</th><th>إجراءات</th>`;
+        headerRow.innerHTML = headerHTML;
+
+        renderTableBody();
+    }
+
+    function renderTableBody() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = "";
+        const count = parseInt(document.getElementById('lecturesCount').value);
+
+        students.forEach((student, index) => {
+            if (!attendanceData[student] || attendanceData[student].length !== count) {
+                let oldData = attendanceData[student] || [];
+                attendanceData[student] = new Array(count).fill(true);
+                for(let i=0; i<Math.min(oldData.length, count); i++) {
+                    attendanceData[student][i] = oldData[i];
+                }
+            }
+
+            let tr = document.createElement('tr');
+            let rowHTML = `<td>${index + 1}</td><td style="text-align: right; font-weight: bold; padding-right: 10px;">${student}</td>`;
+
+            let presentCount = 0;
+            for (let i = 0; i < count; i++) {
+                let isPresent = attendanceData[student][i];
+                if (isPresent) presentCount++;
+                let btnClass = isPresent ? "attendance-btn present" : "attendance-btn absent";
+                let btnText = isPresent ? "✓" : "✗";
+                rowHTML += `<td><button class="${btnClass}" onclick="toggleAttendance('${student}', ${i})">${btnText}</button></td>`;
+            }
+
+            let percentage = Math.round((presentCount / count) * 100);
+            rowHTML += `<td><b>${percentage}%</b></td>`;
+            rowHTML += `<td><button class="btn btn-danger" style="padding: 3px 8px; font-size: 0.8em;" onclick="removeStudent('${student}')">حذف</button></td>`;
+
+            tr.innerHTML = rowHTML;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function toggleAttendance(student, lectureIndex) {
+        attendanceData[student][lectureIndex] = !attendanceData[student][lectureIndex];
+        renderTableBody();
+    }
+
+    function addStudent() {
+        const nameInput = document.getElementById('newStudentName');
+        const name = nameInput.value.trim();
+        if (name && !students.includes(name)) {
+            students.push(name);
+            const count = parseInt(document.getElementById('lecturesCount').value);
+            attendanceData[name] = new Array(count).fill(true);
+            nameInput.value = "";
+            renderTableBody();
+        } else {
+            alert("الرجاء إدخال اسم صحيح أو أن الاسم موجود مسبقاً.");
+        }
+    }
+
+    function removeStudent(name) {
+        students = students.filter(s => s !== name);
+        delete attendanceData[name];
+        renderTableBody();
+    }
+
+    function clearAllStudents() {
+        if (confirm("هل أنت متأكد من حذف جميع الطلاب؟")) {
+            students = [];
+            attendanceData = {};
+            renderTableBody();
+        }
+    }
+
+    function exportPDF() {
+        const element = document.querySelector('.container');
+        const opt = {
+            margin:       0.5,
+            filename:     'كشف_حضور_المحاضرات.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'landscape' }
+        };
+
+        html2pdf().from(element).set(opt).save();
+    }
+
+    window.onload = initApp;
+</script>
+
+</body>
+</html>
