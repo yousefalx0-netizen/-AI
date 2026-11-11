@@ -73,14 +73,14 @@
             font-size: 0.85em;
             font-weight: 600;
         }
-        input {
+        input, textarea {
             padding: 8px;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 0.9em;
             font-family: inherit;
         }
-        input:focus {
+        input:focus, textarea:focus {
             border-color: var(--secondary-color);
             outline: none;
         }
@@ -147,7 +147,6 @@
             margin-top: 20px;
         }
 
-        /* تخصيص الطباعة ليكون شكل الـ PDF احترافياً ومنظموراً */
         @media print {
             body {
                 background: white;
@@ -158,7 +157,7 @@
                 padding: 0;
                 max-width: 100%;
             }
-            .actions-bar, .add-student-box, .btn-danger, th:last-child, td:last-child {
+            .actions-bar, .bulk-add-section, .btn-danger, th:last-child, td:last-child {
                 display: none !important;
             }
             input {
@@ -209,12 +208,15 @@
         </div>
     </div>
 
-    <div class="section-title">قائمة الطلاب وحالة الحضور</div>
-    <div class="add-student-box" style="margin-bottom: 10px; display: flex; gap: 10px;">
-        <input type="text" id="newStudentName" placeholder="أدخل اسم الطالب الجديد..." style="flex: 1;">
-        <button class="btn btn-success" onclick="addStudent()">+ إضافة طالب</button>
+    <!-- قسم إدخال وإلصاق الأسماء دفعة واحدة -->
+    <div class="section-title">إضافة أسماء الطلاب (دفعة واحدة)</div>
+    <div class="bulk-add-section" style="margin-bottom: 15px;">
+        <p style="font-size: 0.85em; color: #64748b; margin-top: 0;">قم بنص أو كتابة الأسماء هنا، بحيث يكون كل اسم في سطر مستقل:</p>
+        <textarea id="bulkNamesInput" rows="4" placeholder="مثال:&#10;يوسف وليد المروني&#10;محمد البطري&#10;زيد العظهي" style="width: 100%; box-sizing: border-box; margin-bottom: 8px;"></textarea>
+        <button class="btn btn-success" onclick="addBulkStudents()">+ إدراج الأسماء في الجدول</button>
     </div>
 
+    <div class="section-title">قائمة الطلاب وحالة الحضور</div>
     <div class="table-responsive">
         <table id="mainTable">
             <thead>
@@ -297,16 +299,37 @@
         renderTableBody();
     }
 
-    function addStudent() {
-        const nameInput = document.getElementById('newStudentName');
-        const name = nameInput.value.trim();
-        if (name && !students.includes(name)) {
-            students.push(name);
-            attendanceData[name] = new Array(lecturesCount).fill(true);
-            nameInput.value = "";
+    // دالة إضافة الأسماء دفعة واحدة من مربع النص
+    function addBulkStudents() {
+        const textarea = document.getElementById('bulkNamesInput');
+        const text = textarea.value.trim();
+        if (!text) {
+            alert("الرجاء إدخال أو لصق أسماء الطلاب أولاً.");
+            return;
+        }
+
+        // تقسيم النص بناءً على الأسطر الجديدة
+        const lines = text.split('\n');
+        let addedCount = 0;
+
+        lines.forEach(line => {
+            let name = line.trim();
+            // تنظيف الاسم من الأرقام الزائدة في البداية إن وجدت (مثل: 1. يوسف -> يوسف)
+            name = name.replace(/^[\d\-,\.\)]+\s*/, '').trim();
+
+            if (name && !students.includes(name)) {
+                students.push(name);
+                attendanceData[name] = new Array(lecturesCount).fill(true);
+                addedCount++;
+            }
+        });
+
+        if (addedCount > 0) {
+            textarea.value = ""; // تفريغ المربع بعد الإضافة
             renderTableBody();
+            alert(`تم إضافة ${addedCount} طالب بنجاح إلى الجدول!`);
         } else {
-            alert("الرجاء إدخال اسم صحيح أو أن الاسم موجود مسبقاً.");
+            alert("لم يتم إضافة أي أسماء جديدة (قد تكون الأسماء مكررة أو فارغة).");
         }
     }
 
